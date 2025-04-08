@@ -92,6 +92,7 @@
 
 ## 🧠 Notes for Cursor AI
 
+- **IMPORTANT:** Do not remove `import '../global.css';` from `app/_layout.tsx`. It is required for NativeWind styling.
 - All code should follow file-based routing (Next.js/Expo Router style)
 - All UI must use NativeWind classes for styling
 - TypeScript-first approach with strict types
@@ -100,7 +101,7 @@
 - Clean and semantic folder structure
 - Use image optimization for listing uploads (compress before upload to Firebase Storage)
 
-## ��‍💻 Maintained by
+## 💻 Maintained by
 
 [Jerald Baroro](https://jeraldbaroro.xyz)  
 Full Stack Mobile & Web Dev

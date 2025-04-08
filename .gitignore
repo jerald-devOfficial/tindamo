@@ -17,6 +17,10 @@ expo-env.d.ts
 *.key
 *.mobileprovision
 
+# Firebase
+google-services.json
+GoogleService-Info.plist
+
 # Metro
 .metro-health-check*
 
@@ -30,6 +34,7 @@ yarn-error.*
 *.pem
 
 # local env files
+.env
 .env*.local
 
 # typescript
