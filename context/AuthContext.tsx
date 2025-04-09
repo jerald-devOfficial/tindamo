@@ -1,4 +1,8 @@
-import { onAuthStateChanged, User } from 'firebase/auth'
+import {
+  signOut as firebaseSignOut,
+  onAuthStateChanged,
+  User
+} from 'firebase/auth'
 import React, {
   createContext,
   ReactNode,
@@ -11,11 +15,13 @@ import { auth } from '../lib/firebase'
 interface AuthContextProps {
   user: User | null
   loading: boolean
+  signOut: () => void
 }
 
 const AuthContext = createContext<AuthContextProps>({
   user: null,
-  loading: true
+  loading: true,
+  signOut: () => {}
 })
 
 export const useAuth = () => useContext(AuthContext)
@@ -38,8 +44,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     return () => unsubscribe()
   }, [])
 
+  const signOut = () => {
+    firebaseSignOut(auth)
+  }
+
   return (
-    <AuthContext.Provider value={{ user, loading }}>
+    <AuthContext.Provider value={{ user, loading, signOut }}>
       {children}
     </AuthContext.Provider>
   )

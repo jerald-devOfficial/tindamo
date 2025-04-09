@@ -68,7 +68,7 @@ function RootLayoutNav() {
     } else if (user && inAuthGroup) {
       // Redirect to the main app (tabs) if the user is authenticated
       // and currently in the auth group.
-      router.replace('/(tabs)')
+      router.replace('/(tabs)/home')
     }
   }, [user, loading, segments, router])
 
