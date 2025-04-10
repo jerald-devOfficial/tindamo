@@ -6,7 +6,7 @@ export default function AuthLayout() {
     <View className='flex-1 bg-white pt-20'>
       <View className='items-center py-20'>
         <Image
-          source={require('../../assets/logo.png')}
+          source={require('../../assets/images/logo/logo-large.png')}
           style={{ width: 128, height: 128 }}
           resizeMode='contain'
         />

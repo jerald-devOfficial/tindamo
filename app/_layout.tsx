@@ -1,9 +1,11 @@
 import FontAwesome from '@expo/vector-icons/FontAwesome'
 import { useFonts } from 'expo-font'
 import { SplashScreen, Stack, useRouter, useSegments } from 'expo-router'
-import { useEffect } from 'react'
+import { doc, getDoc, onSnapshot } from 'firebase/firestore'
+import { useEffect, useState } from 'react'
 import { AuthProvider, useAuth } from '../context/AuthContext'
 import '../global.css' // Import global CSS for NativeWind
+import { db } from '../lib/firebase'
 
 export {
   // Catch any errors thrown by the Layout component.
@@ -46,41 +48,75 @@ function RootLayoutNav() {
   const { user, loading } = useAuth()
   const router = useRouter()
   const segments = useSegments()
+  const [isOnboardingComplete, setIsOnboardingComplete] = useState<
+    boolean | null
+  >(null)
 
-  console.log(
-    'Auth Loading:',
-    loading,
-    'User:',
-    user ? user.uid : null,
-    'Segments:',
-    segments
-  )
+  // Check onboarding status when user changes
+  useEffect(() => {
+    if (!user) return
+
+    const checkOnboarding = async () => {
+      try {
+        const userDoc = await getDoc(doc(db, 'users', user.uid))
+        const isComplete = userDoc.data()?.isOnboardingComplete ?? false
+        console.log('Onboarding status:', isComplete) // Debug log
+        setIsOnboardingComplete(isComplete)
+      } catch (err) {
+        console.error('Error checking onboarding status:', err)
+        setIsOnboardingComplete(false)
+      }
+    }
+
+    // Initial check
+    checkOnboarding()
+
+    // Set up real-time listener for onboarding status changes
+    const unsubscribe = onSnapshot(doc(db, 'users', user.uid), (doc) => {
+      const isComplete = doc.data()?.isOnboardingComplete ?? false
+      console.log('Onboarding status updated:', isComplete) // Debug log
+      setIsOnboardingComplete(isComplete)
+    })
+
+    return () => unsubscribe()
+  }, [user])
 
   useEffect(() => {
     if (loading) return // Wait until loading is finished
 
     const inAuthGroup = segments[0] === '(auth)'
+    const inOnboardingGroup = segments[0] === 'onboarding'
 
     if (!user && !inAuthGroup) {
-      // Redirect to the login page if the user is not authenticated
-      // and not already in the auth group.
+      // Redirect to login if not authenticated
       router.replace('/(auth)/login')
-    } else if (user && inAuthGroup) {
-      // Redirect to the main app (tabs) if the user is authenticated
-      // and currently in the auth group.
-      router.replace('/(tabs)/home')
+    } else if (user && isOnboardingComplete !== null) {
+      // Only handle navigation when we have a definitive onboarding status
+      if (inAuthGroup) {
+        // User is authenticated but in auth group
+        if (!isOnboardingComplete) {
+          router.replace('/onboarding/personal-info')
+        } else {
+          router.replace('/(tabs)/home')
+        }
+      } else if (!isOnboardingComplete && !inOnboardingGroup) {
+        router.replace('/onboarding/personal-info')
+      } else if (isOnboardingComplete && inOnboardingGroup) {
+        router.replace('/(tabs)/home')
+      }
     }
-  }, [user, loading, segments, router])
+  }, [user, loading, segments, router, isOnboardingComplete])
 
-  if (loading) {
-    // You can render a loading indicator here while checking auth status
-    return null // Or a custom loading component
+  if (loading || (user && isOnboardingComplete === null)) {
+    // Show loading state while checking auth and onboarding status
+    return null // Or a loading spinner component
   }
 
   return (
     <Stack>
       <Stack.Screen name='(tabs)' options={{ headerShown: false }} />
       <Stack.Screen name='(auth)' options={{ headerShown: false }} />
+      <Stack.Screen name='onboarding' options={{ headerShown: false }} />
       <Stack.Screen name='modal' options={{ presentation: 'modal' }} />
     </Stack>
   )

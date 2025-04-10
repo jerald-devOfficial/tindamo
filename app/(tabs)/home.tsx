@@ -1,5 +1,7 @@
+import { useAuth } from '@/context/AuthContext'
 import { useNavigation } from '@react-navigation/native'
 import React from 'react'
+
 import {
   FlatList,
   Image,
@@ -98,6 +100,7 @@ const items = [
 ]
 
 export default function HomeScreen() {
+  const { user } = useAuth()
   const navigation = useNavigation()
   return (
     <SafeAreaView className='flex-1 bg-white'>
@@ -105,7 +108,7 @@ export default function HomeScreen() {
         <View className='flex-row items-center justify-between mb-4 border-b border-gray-200 p-4'>
           <View className='flex-row items-center'>
             <Image
-              source={require('../../assets/logo.png')}
+              source={require('../../assets/images/logo/logo-small.png')}
               className='w-10 h-10 mr-2'
               resizeMode='contain'
             />
@@ -113,7 +116,11 @@ export default function HomeScreen() {
           </View>
           <Pressable onPress={() => navigation.navigate('profile' as never)}>
             <Image
-              source={require('../../assets/images/avatars/avatar-male.jpg')}
+              source={
+                user?.photoURL
+                  ? { uri: user.photoURL }
+                  : require('../../assets/images/avatars/avatar-male.jpg')
+              }
               className='w-10 h-10 rounded-full'
               resizeMode='cover'
             />
