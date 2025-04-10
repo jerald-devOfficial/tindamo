@@ -46,7 +46,8 @@ export default function TabLayout() {
               name='user'
               color={colorScheme === 'dark' ? '#fff' : color}
             />
-          )
+          ),
+          headerShown: false
         }}
       />
     </Tabs>
